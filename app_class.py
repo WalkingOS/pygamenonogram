@@ -12,10 +12,12 @@ class App:
     def __init__(self):
         pygame.init()
         self.window = pygame.display.set_mode((352, 352))
+
         self.running = True
         self.grid = boarddefault
         self.gridtop = tasktop
         self.gridleft = taskleft
+        self.generatenonogram()
         self.selected = None
         self.mousePos = None
         self.state = "playing"
@@ -32,22 +34,20 @@ class App:
                 self.playing_update()
                 self.playing_draw()
 
-            if self.allCellsDone():
-                if self.checkRows() == True and self.checkCols() == True:
-                    print("win")
-                    self.state = "done"
-                    self.running = False
-                    pygame.quit()
-                    sys.exit()
-                else:
-                    self.grid = [[0 for x in range(5)] for x in range(5)]
-
-                    self.state = "playing"
-                    self.running = True
-                    self.selectedCells = []
+                if self.allCellsDone():
+                    if self.checkCols() == True and self.checkRows() == True:
+                        print("win")
+                        self.grid = [[0 for x in range(5)] for x in range(5)]
+                        self.selectedCells = []
+                        self.generatenonogram()
 
 
 
+
+            #    self.state = "done"
+            #    self.running = False
+            #    pygame.quit()
+            #    sys.exit()
 
 ### EVENT
 
@@ -67,10 +67,22 @@ class App:
                     if self.selected not in self.selectedCells:
                         self.grid[self.selected[1]][self.selected[0]] = 1
                         self.selectedCells.append(self.selected)
+                        self.cellChanged = True
+
+                        if self.checkrowwwww(self.selected[1]) == False or self.checkcolummm(self.selected[0]) == False:
+                            self.grid = [[0 for x in range(5)] for x in range(5)]
+                            self.selectedCells = []
+
+
+                        #if self.rowDone(self.selected[1]) == True and self.checkRowss(self.selected[1]) == True:
+                        #    print("asfdsklfajklsdfjiöl")
+
                     else:
                         selected = None
                         self.selectedCells.remove(self.selected)
                         self.grid[self.selected[1]][self.selected[0]] = 0
+                        self.cellChanged = True
+
 ### update
     def playing_update(self):
         self.mousePos = pygame.mouse.get_pos()
@@ -90,6 +102,33 @@ class App:
         self.cellChanged = False
 
 ###  CHECKING
+
+    def checkrowwwww(self, row):
+        flag = None
+        if self.rowDone(row) == self.numofrow(row) and self.checkRowss(row) == True:
+            flag = True
+        if self.rowDone(row) == self.numofrow(row) and self.checkRowss(row) == False:
+            flag = False
+        #if self.rowDone(row) < self.numofrow(row):
+        #    if self.checkRowss(row) == False:
+        #        flag = False
+        if self.rowDone(row) > self.numofrow(row):
+            flag = False
+        return flag
+
+    def checkcolummm(self, colum):
+        flag = None
+        if self.columsDone(colum) == self.numofcolums(colum) and self.checkColss(colum) == True:
+            flag = True
+        if self.columsDone(colum) == self.numofcolums(colum) and self.checkColss(colum) == False:
+            flag = False
+        #if self.columsDone(colum) < self.numofcolums(colum):
+        #    if self.checkColss(colum) == False:
+        #        flag = False
+        if self.columsDone(colum) > self.numofcolums(colum):
+            flag = False
+        return flag
+
 
     def numofboard(self):
         sum = 0
@@ -114,19 +153,22 @@ class App:
         sum = 0
         for x in self.grid[row]:
             sum = sum + x
-        if sum == self.numofrow(row):
-            return True
-        else:
-            return False
+    #    if sum == self.numofrow(row):
+        return sum
+    #        return True
+    #    else:
+    #        return False
+        #return sum
 
     def columsDone(self, colums):
         sum = 0
         for yidx, row in enumerate(self.grid):
             sum = sum + self.grid[yidx][colums]
-        if sum == self.numofcolums(colums):
-            return True
-        else:
-            return False
+    #    if sum == self.numofcolums(colums):
+        return sum
+    #        return True
+    #    else:
+    #        return False
 
     def allCellsDone(self):
         sum = 0
@@ -146,14 +188,50 @@ class App:
                     flag = True
         return flag
 
+    def checkRowss(self, row):
+        constraint = deepcopy(self.gridleft[row])
+        currentConstraint = 0
+        for j in range(len(self.grid[row])):
+            if(currentConstraint >= len(constraint)):
+                    break
+
+            if(self.grid[row][j] == 1):
+                constraint[currentConstraint] = constraint[currentConstraint] - 1
+            elif(j > 0
+                and self.grid[row][j-1] == 1
+                and self.grid[row][j] == 0):
+                currentConstraint += 1
+        allZeros = not np.any(constraint)
+        if allZeros == False:
+            return False
+        return True
+
+    def checkColss(self, cols):
+        constraint = deepcopy(self.gridtop[cols])
+        currentConstraint=0
+        for j in range(len(self.grid)):
+            if(currentConstraint >= len(constraint)):
+                break
+
+            if(self.grid[j][cols] == 1):
+                constraint[currentConstraint] = constraint[currentConstraint] - 1
+            elif( j > 0 and self.grid[j-1][cols] == 1 and self.grid[j][cols] == 0):
+                currentConstraint += 1
+        allZeros = not np.any(constraint)
+
+            #Wenn eine Reihe/Spalte noch nicht gelöst ist
+        if allZeros == False:
+            return False
+        return True
+
     def checkRows(self):
         for  i in range(len(self.grid)):
             constraint = deepcopy(self.gridleft[i])
             currentConstraint = 0
-            for j in range(len(self.grid[i])):
-                if(currentConstraint >= len(constraint) ):
-                    break
 
+            for j in range(len(self.grid[i])):
+                if(currentConstraint >= len(constraint)):
+                    break
                 if(self.grid[i][j] == 1):
                     constraint[currentConstraint] = constraint[currentConstraint] - 1
                 elif(j > 0
@@ -163,10 +241,10 @@ class App:
             allZeros = not np.any(constraint)
             if allZeros == False:
                 return False
-        return True
+            return True
 
     def checkCols(self):
-        for i in range(len(self.grid[0])):
+        for i in range(len(self.grid)):
             constraint = deepcopy(self.gridtop[i])
             currentConstraint=0
             for j in range(len(self.grid)):
@@ -182,16 +260,69 @@ class App:
             #Wenn eine Reihe/Spalte noch nicht gelöst ist
             if allZeros == False:
                 return False
-        return True
+            return True
+
+    def checkGame(self, rows, cols):
+        flag = None
+
+        if self.rowDone(rows) == True and self.checkRowss(rows) != True:
+            flag = False
+
+        if self.columsDone(cols) == True and self.checkColss(cols) != True:
+            flag = False
+
+        return flag
+
+
+#for x in range(3):#
+#    print(x)
+    #####array in array programmieren
+    #if constraint[x] == 0:
+    #    constraint.remove(constraint[x])
 
 
 ### HELPER FUNCTION
 
-    #def createnono(self):
-    #    sum = 0
-    #    for yidx, row in enumerate(self.grid):
-    #        for xidx, num in enumerate(row):
-    #            pass
+    def generatenonogram(self):
+        while(True):
+            sum = 0
+            board = [[random.randint(0, 1) for x in range(5)] for x in range(5)]
+            for yidx, row in enumerate(board):
+                for xidx, num in enumerate(row):
+                    sum+=num
+            if sum == 13:
+                break
+
+        if sum == 13:
+            for  i in range(len(board)):
+                constraint = [0,0,0]
+                currentConstraint = 0
+                for j in range(len(board[0])):
+                    if(board[j][i] == 1):
+                        constraint[currentConstraint] = constraint[currentConstraint] + 1
+                    elif( j > 0 and board[j-1][i] == 1 and board[j][i] == 0):
+                        currentConstraint -= 1
+
+                con = deepcopy(constraint)
+                for x in range(len(constraint)):
+                    if constraint[x] == 0:
+                        con.remove(0)
+                self.gridtop[i] = con
+
+            for i in range(len(board)):
+                constraint = [0,0,0]
+                currentConstraint = 0
+                for j in range(len(board[0])):
+                    if(board[i][j] == 1):
+                        constraint[currentConstraint] = constraint[currentConstraint] + 1
+                    elif(j > 0 and board[i][j-1] == 1 and board[i][j] == 0):
+                        currentConstraint -= 1
+
+                con = deepcopy(constraint)
+                for x in range(len(constraint)):
+                    if constraint[x] == 0:
+                        con.remove(0)
+                self.gridleft[i] = con
 
 
     def shadeSelectedCells(self, window, selection):
