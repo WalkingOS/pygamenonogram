@@ -2,17 +2,13 @@ import pygame, sys
 import requests
 import numpy as np
 from copy import deepcopy
-#from bs4 import Be autifulSoup
-
 from settings import *
 from buttonClass import *
-
 
 class App:
     def __init__(self):
         pygame.init()
         self.window = pygame.display.set_mode((352, 352))
-
         self.running = True
         self.grid = boarddefault
         self.gridtop = tasktop
@@ -21,11 +17,9 @@ class App:
         self.selected = None
         self.mousePos = None
         self.state = "playing"
-        self.finished = False
-        self.cellChanged = False
+        #self.finished = False
         self.selectedCells = []
         self.font = pygame.font.SysFont("arial", cellSize//2)
-
 
     def run(self):
         while self.running:
@@ -36,18 +30,9 @@ class App:
 
                 if self.allCellsDone():
                     if self.checkCols() == True and self.checkRows() == True:
-                        print("win")
                         self.grid = [[0 for x in range(5)] for x in range(5)]
                         self.selectedCells = []
                         self.generatenonogram()
-
-
-
-
-            #    self.state = "done"
-            #    self.running = False
-            #    pygame.quit()
-            #    sys.exit()
 
 ### EVENT
 
@@ -67,15 +52,10 @@ class App:
                     if self.selected not in self.selectedCells:
                         self.grid[self.selected[1]][self.selected[0]] = 1
                         self.selectedCells.append(self.selected)
-                        self.cellChanged = True
 
                         if self.checkrowwwww(self.selected[1]) == False or self.checkcolummm(self.selected[0]) == False:
                             self.grid = [[0 for x in range(5)] for x in range(5)]
                             self.selectedCells = []
-
-
-                        #if self.rowDone(self.selected[1]) == True and self.checkRowss(self.selected[1]) == True:
-                        #    print("asfdsklfajklsdfjiöl")
 
                     else:
                         selected = None
@@ -91,15 +71,12 @@ class App:
 
     def playing_draw(self):
         self.window.fill(WHITE)
-        #if self.selected:
-        #    self.drawSelection(self.window, self.selected)
         self.drawNumbersBoard(self.window)
         self.shadeSelectedCells(self.window, self.selectedCells)
         self.drawNumbersTop(self.window)
         self.drawNumbersLeft(self.window)
         self.drawGrid(self.window)
         pygame.display.update()
-        self.cellChanged = False
 
 ###  CHECKING
 
@@ -109,9 +86,6 @@ class App:
             flag = True
         if self.rowDone(row) == self.numofrow(row) and self.checkRowss(row) == False:
             flag = False
-        #if self.rowDone(row) < self.numofrow(row):
-        #    if self.checkRowss(row) == False:
-        #        flag = False
         if self.rowDone(row) > self.numofrow(row):
             flag = False
         return flag
@@ -122,13 +96,9 @@ class App:
             flag = True
         if self.columsDone(colum) == self.numofcolums(colum) and self.checkColss(colum) == False:
             flag = False
-        #if self.columsDone(colum) < self.numofcolums(colum):
-        #    if self.checkColss(colum) == False:
-        #        flag = False
         if self.columsDone(colum) > self.numofcolums(colum):
             flag = False
         return flag
-
 
     def numofboard(self):
         sum = 0
@@ -136,6 +106,16 @@ class App:
             for xidx, num in enumerate(row):
                 sum=sum+num
         return sum
+
+    def allCellsDone(self):
+        sum = 0
+        for yidx, row in enumerate(self.grid):
+            for xidx, num in enumerate(row):
+                sum+=num
+        if sum == self.numofboard():
+            return True
+        else:
+            return False
 
     def numofrow(self, rowleft):
         sum = 0
@@ -153,40 +133,13 @@ class App:
         sum = 0
         for x in self.grid[row]:
             sum = sum + x
-    #    if sum == self.numofrow(row):
         return sum
-    #        return True
-    #    else:
-    #        return False
-        #return sum
 
     def columsDone(self, colums):
         sum = 0
         for yidx, row in enumerate(self.grid):
             sum = sum + self.grid[yidx][colums]
-    #    if sum == self.numofcolums(colums):
         return sum
-    #        return True
-    #    else:
-    #        return False
-
-    def allCellsDone(self):
-        sum = 0
-        for yidx, row in enumerate(self.grid):
-            for xidx, num in enumerate(row):
-                sum+=num
-        if sum == self.numofboard():
-            return True
-        else:
-            return False
-
-    def checkAllCells(self):
-        flag = None
-        if self.allCellsDone():
-            for x in range(5):
-                if self.columsDone(x) and self.rowDone(x):
-                    flag = True
-        return flag
 
     def checkRowss(self, row):
         constraint = deepcopy(self.gridleft[row])
@@ -273,14 +226,6 @@ class App:
 
         return flag
 
-
-#for x in range(3):#
-#    print(x)
-    #####array in array programmieren
-    #if constraint[x] == 0:
-    #    constraint.remove(constraint[x])
-
-
 ### HELPER FUNCTION
 
     def generatenonogram(self):
@@ -323,7 +268,6 @@ class App:
                     if constraint[x] == 0:
                         con.remove(0)
                 self.gridleft[i] = con
-
 
     def shadeSelectedCells(self, window, selection):
         for cell in selection:
