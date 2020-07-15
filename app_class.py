@@ -13,6 +13,7 @@ class App:
         self.grid = boarddefault
         self.gridtop = tasktop
         self.gridleft = taskleft
+        self.boardd = None
         self.generatenonogram()
         self.selected = None
         self.mousePos = None
@@ -20,19 +21,35 @@ class App:
         #self.finished = False
         self.selectedCells = []
         self.font = pygame.font.SysFont("arial", cellSize//2)
+        self.lose = 0
+        self.win = 0
 
     def run(self):
+
+        done = False
+        frames = [action, state, reward]
+
         while self.running:
             if self.state == "playing":
                 self.playing_events()
                 self.playing_update()
                 self.playing_draw()
 
-                if self.allCellsDone():
-                    if self.checkCols() == True and self.checkRows() == True:
-                        self.grid = [[0 for x in range(5)] for x in range(5)]
-                        self.selectedCells = []
-                        self.generatenonogram()
+                #while not done:
+                #    action = null;
+
+                    if self.allCellsDone():
+                        if self.checkCols() == True and self.checkRows() == True:
+                            print("board: ", self.boardd)
+                            print("grid : ", self.grid)
+                            if self.boardd == self.grid:
+                                pass
+                            else:
+                                self.grid = [[0 for x in range(5)] for x in range(5)]
+                                self.selectedCells = []
+                                self.win = self.win + 1
+                                self.generatenonogram()
+                            #    print("win: ", self.win)
 
 ### EVENT
 
@@ -54,8 +71,10 @@ class App:
                         self.selectedCells.append(self.selected)
 
                         if self.checkrowwwww(self.selected[1]) == False or self.checkcolummm(self.selected[0]) == False:
+                            self.lose = self.lose + 1
                             self.grid = [[0 for x in range(5)] for x in range(5)]
                             self.selectedCells = []
+                            print("lose: ", self.lose)
 
                     else:
                         selected = None
@@ -232,6 +251,7 @@ class App:
         while(True):
             sum = 0
             board = [[random.randint(0, 1) for x in range(5)] for x in range(5)]
+            self.boardd = board
             for yidx, row in enumerate(board):
                 for xidx, num in enumerate(row):
                     sum+=num
